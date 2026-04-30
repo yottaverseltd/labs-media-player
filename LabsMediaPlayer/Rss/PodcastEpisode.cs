@@ -12,10 +12,10 @@ public sealed record PodcastEpisode(
         $"{FormatDate(Published)}  ·  {FormatDuration(Duration)}";
 
     private static string FormatDate(DateTimeOffset? published) =>
-        published is { } d ? d.ToLocalTime().ToString("yyyy-MM-dd") : "—";
+        published is { } d ? d.ToLocalTime().ToString("yyyy-MM-dd") : "-";
 
     private static string FormatDuration(TimeSpan? duration) =>
-        duration is not { } d ? "—" : d.TotalHours >= 1
+        duration is not { } d ? "-" : d.TotalHours >= 1
             ? d.ToString(@"h\:mm\:ss", System.Globalization.CultureInfo.InvariantCulture)
             : d.ToString(@"m\:ss", System.Globalization.CultureInfo.InvariantCulture);
 }
