@@ -6,7 +6,7 @@
     <UnoSingleProject>true</UnoSingleProject>
 
     <!-- Display name -->
-    <ApplicationTitle>LabsMediaPlayer</ApplicationTitle>
+    <ApplicationTitle>Labs · Audio</ApplicationTitle>
     <!-- App Identifier -->
     <ApplicationId>com.yottaverseltd.labsmediaplayer</ApplicationId>
     <!-- Versions -->
@@ -15,7 +15,7 @@
     <!-- Package Publisher -->
     <ApplicationPublisher>yottaverseltd</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>Uno WASM and desktop podcast player (labs).</Description>
+    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM (HTML audio) and Skia desktop.</Description>
 
     <!--
       UnoFeatures are used to quickly add and manage features enabled for your app.
@@ -25,6 +25,9 @@
       SkiaRenderer;
       MediaPlayerElement;
     </UnoFeatures>
+
+    <!-- Wasm boot splash background (merged into AppManifest.js by Resizetizer — default is #FFFFFF) -->
+    <UnoSplashScreenColor>#0B0D10</UnoSplashScreenColor>
   </PropertyGroup>
 
   <ItemGroup>

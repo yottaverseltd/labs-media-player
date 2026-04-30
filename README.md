@@ -1,60 +1,52 @@
 # labs-media-player
 
-Tagline: **Uno, audio, and restraint.**
+Cross-platform podcast playback in Uno: browse an RSS feed, pick enclosure URLs, and listen through **MediaPlayerElement** (HTML audio on WebAssembly, native stack on Windows desktop).
 
-Minimal Uno Platform podcast demo (Skia desktop + WebAssembly). Browse episodes from an RSS feed, pick enclosures, and play audio through `MediaPlayerElement` (HTML audio path on WASM, native stack on desktop).
+**Live:** https://yottaverseltd.github.io/labs-media-player/
 
-## Default feed
+**Source:** https://github.com/yottaverseltd/labs-media-player
 
-Stable public RSS used in-app by default:
+## Downloads
 
-`https://feeds.npr.org/510289/podcast.xml` (NPR Planet Money)
+### Desktop (Windows)
 
-Paste any other feed URL in the field and tap **Load feed**.
+Zip builds attach to **[GitHub Releases](https://github.com/yottaverseltd/labs-media-player/releases)** when a maintainer pushes a version tag (`v*`). The **`release-desktop`** workflow (see [`.github/workflows/release-desktop.yml`](.github/workflows/release-desktop.yml)) publishes **`labs-media-player-net9.0-desktop.zip`** from **`net9.0-desktop`**.
 
-## CORS proxy (WASM)
+### Mobile / APK
 
-Browsers block anonymous RSS reads across origins. Use the tiny Cloudflare Worker under `worker/`:
+Not shipped from this repo. **`LabsMediaPlayer.csproj`** targets **`net9.0-browserwasm`** and **`net9.0-desktop`** only. On phones and tablets, use the **live WASM** link above in the browser (install as PWA if your browser offers it). There is **no APK** here.
+
+_Suggested repo topics: `uno-platform`, `dotnet`, `wasm`, `skia`, `media-player`, `podcast`, `rss`_
+
+## What you get
+
+- **Browser:** Run the live URL or publish WASM locally with `-p:WasmShellWebAppBasePath=/labs-media-player/` so paths match GitHub Pages.
+- **Desktop:** `dotnet run -f net9.0-desktop` or grab a Release zip after a tagged build.
+- **RSS:** Default feed is NPR Planet Money (`https://feeds.npr.org/510289/podcast.xml`); paste any feed URL and tap **Load feed**.
+- **Optional CORS helper:** Browsers block cross-origin RSS for anonymous requests. The tiny Cloudflare Worker under `worker/` proxies `GET {your-worker}/?url={encodedFeedUrl}`. Deploy with Wrangler, paste the Worker base into **CORS proxy base** in the app. Desktop Skia reads feeds directly; the proxy is WASM-only.
+
+## Run locally
 
 ```powershell
-cd worker
-npm install -g wrangler
-wrangler login
-wrangler deploy
+dotnet workload install wasm-tools   # once, for WASM
+dotnet restore
+dotnet build -c Release
+dotnet run --project LabsMediaPlayer/LabsMediaPlayer.csproj -f net9.0-desktop
 ```
 
-Your Worker URL looks like `https://labs-media-player-rss.<your-subdomain>.workers.dev`.
-
-Paste that base into **CORS proxy base** in the app. The client requests:
-
-`GET {proxy}/?url={Uri.EscapeDataString(feedUrl)}`
-
-Desktop Skia can call the feed URL directly; the proxy remains optional.
-
-## Live site
-
-Turn on GitHub Pages once: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-
-The workflow publishes WASM with `WasmShellWebAppBasePath=/labs-media-player/`.
-
-After the first successful run on `main`:
-
-`https://yottaverseltd.github.io/labs-media-player/`
-
-Replace org/user if the fork lives elsewhere.
-
-## Build locally
+Publish WASM (same base path as Pages):
 
 ```powershell
-dotnet workload install wasm-tools
-dotnet build LabsMediaPlayer/LabsMediaPlayer.csproj -f net9.0-desktop
 dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj -c Release -f net9.0-browserwasm -p:WasmShellWebAppBasePath=/labs-media-player/
 ```
 
 ## Stack
 
-- Uno single project, `net9.0-browserwasm` + `net9.0-desktop`, Skia renderer, `MediaPlayerElement` feature.
-- RSS: `System.ServiceModel.Syndication` + optional `itunes:duration`.
-- CI: `.github/workflows/deploy-pages.yml` installs `wasm-tools`, publishes WASM, uploads Pages artifact.
+- Uno single project, Skia renderer, **`MediaPlayerElement`** feature.
+- RSS via **`System.ServiceModel.Syndication`** (optional `itunes:duration` when present).
+- **CI:** [.github/workflows/ci.yml](.github/workflows/ci.yml) — Release build + WASM publish artifact on push/PR.
+- **Pages:** [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) — WASM to GitHub Pages with **`WasmShellWebAppBasePath=/labs-media-player/`**, `.nojekyll` for `_framework`.
 
-See `AGENTS.md` for editorial and code rules.
+## License
+
+MIT. See `LICENSE`.

@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: restore
+        run: dotnet restore
+
+      - name: build
+        run: dotnet build -c Release /p:TreatWarningsAsErrors=true --no-restore
+
+      - name: publish wasm
+        run: >
+          dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
+          -c Release -f net9.0-browserwasm
+          -o artifacts/wasm /p:TreatWarningsAsErrors=true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm
+          path: artifacts/wasm
+          if-no-files-found: error
+          retention-days: 14
