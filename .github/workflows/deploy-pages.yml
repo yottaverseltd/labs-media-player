@@ -29,10 +29,7 @@ jobs:
       - name: install wasm-tools
         run: dotnet workload install wasm-tools
 
-      - name: configure pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # Pages must use Source: GitHub Actions (once per repo under Settings → Pages); see README Troubleshooting.
 
       - name: publish wasm
         run: >

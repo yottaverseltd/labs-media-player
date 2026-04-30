@@ -4,6 +4,8 @@ Cross-platform podcast lab in Uno: RSS enclosures and **MediaPlayerElement** (HT
 
 **Live:** https://yottaverseltd.github.io/labs-media-player/
 
+**Troubleshooting:** If the live URL returns 404, open **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**, then re-run the latest **deploy-pages** workflow.
+
 **Desktop (Windows):** https://github.com/yottaverseltd/labs-media-player/releases/tag/continuous — download `labs-media-player-net9.0-desktop.zip` (refreshed on every successful `main` build).
 
 **Android:** https://github.com/yottaverseltd/labs-media-player/releases/tag/continuous — download `labs-media-player-net9.0-android.apk`. Sideload only; expect an ephemeral CI signing key (“unknown publisher”).
