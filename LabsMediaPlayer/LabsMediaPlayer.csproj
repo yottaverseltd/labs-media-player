@@ -15,7 +15,7 @@
     <!-- Package Publisher -->
     <ApplicationPublisher>yottaverseltd</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM, Windows desktop, and Android.</Description>
+    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM, Windows desktop, Android, and iOS when building on macOS.</Description>
 
     <!--
       UnoFeatures are used to quickly add and manage features enabled for your app.
@@ -28,6 +28,11 @@
 
     <!-- Wasm boot splash background (merged into AppManifest.js by Resizetizer — default is #FFFFFF) -->
     <UnoSplashScreenColor>#0B0D10</UnoSplashScreenColor>
+  </PropertyGroup>
+
+  <!-- net9.0-ios is evaluated only on macOS so Windows/Linux CI keeps building wasm + desktop + android. -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('osx'))">
+    <TargetFrameworks>$(TargetFrameworks);net9.0-ios</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
