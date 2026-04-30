@@ -49,9 +49,9 @@ dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj -c Release -f net9.0-brows
 
 ### GitHub Pages (maintainers)
 
-Workflow permissions match [labs-responsive-shell](https://github.com/yottaverseltd/labs-responsive-shell) (`pages: write`, `id-token: write`, `actions/configure-pages@v5`, `actions/deploy-pages@v4`). This repo historically had **no green deploy** because `configure-pages` with **`enablement: true`** attempted to **create** the Pages site via the API and GitHub returned **Resource not accessible by integration** for the org; without Pages enabled, **`deploy-pages` then fails with HTTP 404** (“Ensure GitHub Pages has been enabled”).
+Workflow permissions align with [labs-responsive-shell](https://github.com/yottaverseltd/labs-responsive-shell): **`permissions: contents: read, pages: write, id-token: write`**, **`actions/upload-pages-artifact@v3`**, **`actions/deploy-pages@v4`**, **`WasmShellWebAppBasePath=/labs-media-player/`**. This workflow **omits `actions/configure-pages`** on purpose (see comments in [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)): that action either fails **GET Pages** when no site exists yet, or hits **POST create** with **`enablement: true`**, which often returns **`Resource not accessible by integration`** for organization `GITHUB_TOKEN`.
 
-**One-time (GitHub UI):** in this repository open **Settings → Pages** and set **Build and deployment** source to **GitHub Actions**. After that, push to `main` or re-run **deploy-pages**; the live URL remains **`/labs-media-player/`**.
+**One-time (GitHub UI):** in this repository open **Settings → Pages** and set **Build and deployment** source to **GitHub Actions**. That creates the Pages site so **`deploy-pages`** can attach the WASM artifact; the URL is **`https://yottaverseltd.github.io/labs-media-player/`**.
 
 ## License
 
