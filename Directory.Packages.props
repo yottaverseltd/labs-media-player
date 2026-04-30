@@ -1,0 +1,5 @@
+<Project ToolsVersion="15.0">
+  <ItemGroup>
+    <PackageVersion Include="System.ServiceModel.Syndication" Version="9.0.12" />
+  </ItemGroup>
+</Project>

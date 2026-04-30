@@ -1,0 +1,10 @@
+{
+  "sdk": {
+    "version": "9.0.312",
+    "rollForward": "latestFeature",
+    "allowPrerelease": false
+  },
+  "msbuild-sdks": {
+    "Uno.Sdk": "6.5.31"
+  }
+}

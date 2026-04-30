@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- why: Uno single-project emits these on every build; they carry no code-quality signal -->
+    <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257;CS1591;CA1010;IDE0008;IDE0022;IDE0058;IDE0060;IDE0130;Uno0001</NoWarn>
+    <!-- why: Uno.UI publishes trim annotations that raise IL2104 under publish; acceptable for a Pages WASM demo -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL2026;IL2046;IL2050;IL2057;IL2060;IL2062;IL2063;IL2064;IL2065;IL2066;IL2067;IL2068;IL2069;IL2070;IL2072;IL2074;IL2075;IL2077;IL2080;IL2087;IL2088;IL2089;IL2091;IL2092;IL2093;IL2111</WarningsNotAsErrors>
+  </PropertyGroup>
+</Project>

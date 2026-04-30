@@ -1,0 +1,9 @@
+<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Duration x:Key="MotionDefault">0:0:0.200</Duration>
+  <Duration x:Key="MotionFast">0:0:0.120</Duration>
+
+  <CubicEase x:Key="EaseStandard" EasingMode="EaseInOut" />
+</ResourceDictionary>

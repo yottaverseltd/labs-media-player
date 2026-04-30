@@ -1,0 +1,61 @@
+name: deploy-pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: install wasm-tools
+        run: dotnet workload install wasm-tools
+
+      - name: configure pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: publish wasm
+        run: >
+          dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
+          -c Release -f net9.0-browserwasm
+          -o artifacts/wasm
+          -p:TreatWarningsAsErrors=true
+          -p:WasmShellWebAppBasePath=/labs-media-player/
+
+      # why: _framework starts with underscore; Jekyll would drop it on Pages
+      - name: disable jekyll
+        run: touch artifacts/wasm/wwwroot/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/wasm/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

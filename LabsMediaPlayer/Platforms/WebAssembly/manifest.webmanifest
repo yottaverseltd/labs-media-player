@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "LabsMediaPlayer",
+  "display": "standalone",
+  "name": "LabsMediaPlayer",
+  "short_name": "LabsMediaPlayer",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

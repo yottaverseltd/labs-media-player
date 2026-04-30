@@ -1,0 +1,7 @@
+{
+  "name": "labs-media-player-rss-worker",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.28.0"
+  }
+}
