@@ -11,7 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +22,15 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: install workloads
+        run: |
+          dotnet workload install wasm-tools
+          dotnet workload install android
+
       - name: restore
         run: dotnet restore
 
-      - name: build
+      - name: build (all targets)
         run: dotnet build -c Release /p:TreatWarningsAsErrors=true --no-restore
 
       - name: publish wasm
@@ -38,3 +45,69 @@ jobs:
           path: artifacts/wasm
           if-no-files-found: error
           retention-days: 14
+
+      - name: publish desktop (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: >
+          dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
+          -c Release -f net9.0-desktop
+          -o publish/desktop
+          /p:TreatWarningsAsErrors=true
+
+      - name: zip desktop (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: Compress-Archive -Path publish/desktop/* -DestinationPath labs-media-player-net9.0-desktop.zip -Force
+
+      - name: publish android (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: >
+          dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
+          -c Release -f net9.0-android
+          -o publish/android
+          /p:TreatWarningsAsErrors=true
+
+      - name: stage apk (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem -Path publish/android -Filter *.apk -Recurse | Select-Object -First 1
+          if (-not $apk) { throw "No APK produced under publish/android" }
+          Copy-Item $apk.FullName -Destination labs-media-player-net9.0-android.apk -Force
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: desktop-windows
+          path: labs-media-player-net9.0-desktop.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: android-apk
+          path: labs-media-player-net9.0-android.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: upsert continuous release (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if ! gh release view continuous --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release create continuous \
+              --repo "${GITHUB_REPOSITORY}" \
+              --prerelease \
+              --title "Continuous (main)" \
+              --notes "Windows desktop (.zip) and Android (.apk) from the latest successful build on \`main\`. Tag is stable for URLs; assets are replaced each run." \
+              --target "${GITHUB_SHA}"
+          fi
+          gh release upload continuous \
+            labs-media-player-net9.0-desktop.zip \
+            labs-media-player-net9.0-android.apk \
+            --repo "${GITHUB_REPOSITORY}" \
+            --clobber

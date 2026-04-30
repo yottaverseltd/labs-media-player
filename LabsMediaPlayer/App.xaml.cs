@@ -46,7 +46,9 @@ public partial class App : Application
             rootFrame.Navigate(typeof(MainPage), args.Arguments);
         }
 
+#if !__ANDROID__
         MainWindow.SetWindowIcon();
+#endif
         // Ensure the current window is active
         MainWindow.Activate();
     }

@@ -1,6 +1,6 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-browserwasm;net9.0-desktop</TargetFrameworks>
+    <TargetFrameworks>net9.0-browserwasm;net9.0-desktop;net9.0-android</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
@@ -15,7 +15,7 @@
     <!-- Package Publisher -->
     <ApplicationPublisher>yottaverseltd</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM (HTML audio) and Skia desktop.</Description>
+    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM, Windows desktop, and Android.</Description>
 
     <!--
       UnoFeatures are used to quickly add and manage features enabled for your app.
@@ -28,6 +28,16 @@
 
     <!-- Wasm boot splash background (merged into AppManifest.js by Resizetizer — default is #FFFFFF) -->
     <UnoSplashScreenColor>#0B0D10</UnoSplashScreenColor>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UnoIcon Include="Assets\Icons\icon.svg" ForegroundFile="Assets\Icons\icon_foreground.svg" ForegroundScale="0.65" Color="#1A73E8" />
+    <UnoSplashScreen Include="Assets\Splash\splash_screen.svg" BaseSize="128,128" Color="#0B0D10" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
   </PropertyGroup>
 
   <ItemGroup>

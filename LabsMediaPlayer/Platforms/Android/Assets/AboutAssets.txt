@@ -1,0 +1,1 @@
+Android-only assets. Prefer shared Assets/ in the single project for cross-platform files.

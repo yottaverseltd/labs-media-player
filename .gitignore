@@ -483,7 +483,8 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# Single Target Config
-solution-config.props
+# Local WASM publish experiments
+_wasm_test/
+
 # Publish Profiles
 !**/Properties/PublishProfiles/*.pubxml
