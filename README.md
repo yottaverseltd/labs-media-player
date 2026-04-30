@@ -10,7 +10,7 @@ Cross-platform podcast playback in Uno: browse an RSS feed, pick enclosure URLs,
 
 ### Desktop (Windows)
 
-Zip builds attach to **[GitHub Releases](https://github.com/yottaverseltd/labs-media-player/releases)** when a maintainer pushes a version tag (`v*`). The **`release-desktop`** workflow (see [`.github/workflows/release-desktop.yml`](.github/workflows/release-desktop.yml)) publishes **`labs-media-player-net9.0-desktop.zip`** from **`net9.0-desktop`**.
+Zip builds attach to **[GitHub Releases](https://github.com/yottaverseltd/labs-media-player/releases)** when you push a version tag (`v*`). The **`release-desktop`** workflow (see [`.github/workflows/release-desktop.yml`](.github/workflows/release-desktop.yml)) publishes **`labs-media-player-net9.0-desktop.zip`** from **`net9.0-desktop`**.
 
 ### Mobile / APK
 
@@ -46,12 +46,6 @@ dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj -c Release -f net9.0-brows
 - RSS via **`System.ServiceModel.Syndication`** (optional `itunes:duration` when present).
 - **CI:** [.github/workflows/ci.yml](.github/workflows/ci.yml) — Release build + WASM publish artifact on push/PR.
 - **Pages:** [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) — WASM to GitHub Pages with **`WasmShellWebAppBasePath=/labs-media-player/`**, `.nojekyll` for `_framework`.
-
-### GitHub Pages (maintainers)
-
-Workflow permissions align with [labs-responsive-shell](https://github.com/yottaverseltd/labs-responsive-shell): **`permissions: contents: read, pages: write, id-token: write`**, **`actions/upload-pages-artifact@v3`**, **`actions/deploy-pages@v4`**, **`WasmShellWebAppBasePath=/labs-media-player/`**. This workflow **omits `actions/configure-pages`** on purpose (see comments in [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)): that action either fails **GET Pages** when no site exists yet, or hits **POST create** with **`enablement: true`**, which often returns **`Resource not accessible by integration`** for organization `GITHUB_TOKEN`.
-
-**One-time (GitHub UI):** in this repository open **Settings → Pages** and set **Build and deployment** source to **GitHub Actions**. That creates the Pages site so **`deploy-pages`** can attach the WASM artifact; the URL is **`https://yottaverseltd.github.io/labs-media-player/`**.
 
 ## License
 

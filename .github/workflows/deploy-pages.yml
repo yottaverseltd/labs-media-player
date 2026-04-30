@@ -29,11 +29,10 @@ jobs:
       - name: install wasm-tools
         run: dotnet workload install wasm-tools
 
-      # Skip actions/configure-pages: with no site yet, GET /pages returns 404 and
-      # the step fails; enablement:true hits POST create which often returns
-      # "Resource not accessible by integration" for org GITHUB_TOKEN. We do not
-      # consume configure-pages outputs — deploy-pages uses workflow permissions only.
-      # Maintainer: Settings → Pages → Source: GitHub Actions (once).
+      - name: configure pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: publish wasm
         run: >
