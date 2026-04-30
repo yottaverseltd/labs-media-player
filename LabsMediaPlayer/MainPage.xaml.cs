@@ -33,7 +33,8 @@ public sealed partial class MainPage : Page
     private double _speed = 1d;
 #endif
 
-    private bool _isWideLayout;
+    /// <summary>Last applied breakpoint; null until first ApplyLayout runs (avoids skipping initial narrow layout while both wide and baseline are false).</summary>
+    private bool? _appliedWideBreakpoint;
 
     private string _podcastTitle = string.Empty;
 
@@ -120,12 +121,12 @@ public sealed partial class MainPage : Page
 
     private void ApplyLayout(bool wide)
     {
-        if (wide == _isWideLayout)
+        if (_appliedWideBreakpoint is { } last && wide == last)
         {
             return;
         }
 
-        _isWideLayout = wide;
+        _appliedWideBreakpoint = wide;
 
         RootGrid.ColumnDefinitions.Clear();
         RootGrid.RowDefinitions.Clear();
@@ -168,7 +169,14 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            var settings = ApplicationData.Current.LocalSettings.Values;
+            var appData = ApplicationData.Current;
+            if (appData?.LocalSettings?.Values is not { } settings)
+            {
+                FeedUrlBox.Text = FeedDefaults.DefaultFeedUrl;
+                ProxyUrlBox.Text = string.Empty;
+                return;
+            }
+
             if (settings.TryGetValue(SettingsFeedKey, out var feedObj) && feedObj is string feed && !string.IsNullOrWhiteSpace(feed))
             {
                 FeedUrlBox.Text = feed;
@@ -193,7 +201,12 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            var settings = ApplicationData.Current.LocalSettings.Values;
+            var appData = ApplicationData.Current;
+            if (appData?.LocalSettings?.Values is not { } settings)
+            {
+                return;
+            }
+
             settings[SettingsFeedKey] = FeedUrlBox.Text.Trim();
             settings[SettingsProxyKey] = ProxyUrlBox.Text.Trim();
         }
