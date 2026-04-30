@@ -38,6 +38,8 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidUseAapt2>true</AndroidUseAapt2>
+    <!-- CI: Profiled AOT can fail on transitive assemblies; JIT is fine for lab APKs. -->
+    <RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>

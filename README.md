@@ -2,7 +2,12 @@
 
 Cross-platform podcast lab in Uno: RSS enclosures and **MediaPlayerElement** (HTML audio on WebAssembly, native stacks on Windows desktop and Android). Optional Cloudflare Worker under `worker/` for WASM CORS.
 
+## Try it on GitHub Pages
+
 **Live:** https://yottaverseltd.github.io/labs-media-player/
+
+**Prerequisites:** none for the WASM shell (RSS may need the Worker or a CORS-friendly feed). **Desktop zip** and **Android APK** download from the **`continuous`** prerelease only after a green **`ci`** run on **`main`**:
+https://github.com/yottaverseltd/labs-media-player/releases/tag/continuous
 
 **Troubleshooting:** If the live URL returns 404, open **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**, then re-run the latest **deploy-pages** workflow.
 

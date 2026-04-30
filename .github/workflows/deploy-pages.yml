@@ -30,13 +30,21 @@ jobs:
         run: dotnet workload install wasm-tools
 
       # Pages must use Source: GitHub Actions (once per repo under Settings → Pages); see README Troubleshooting.
+      # linux: restrict to browserwasm so restore does not require the Android workload (NETSDK1147).
+
+      - name: restore wasm only
+        run: >
+          dotnet restore LabsMediaPlayer/LabsMediaPlayer.csproj
+          -p:TargetFrameworks=net9.0-browserwasm
 
       - name: publish wasm
         run: >
           dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
+          --no-restore
           -c Release -f net9.0-browserwasm
           -o artifacts/wasm
           -p:TreatWarningsAsErrors=true
+          -p:TargetFrameworks=net9.0-browserwasm
           -p:WasmShellWebAppBasePath=/labs-media-player/
 
       # why: _framework starts with underscore; Jekyll would drop it on Pages
