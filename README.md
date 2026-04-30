@@ -47,6 +47,12 @@ dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj -c Release -f net9.0-brows
 - **CI:** [.github/workflows/ci.yml](.github/workflows/ci.yml) — Release build + WASM publish artifact on push/PR.
 - **Pages:** [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) — WASM to GitHub Pages with **`WasmShellWebAppBasePath=/labs-media-player/`**, `.nojekyll` for `_framework`.
 
+### GitHub Pages (maintainers)
+
+Workflow permissions match [labs-responsive-shell](https://github.com/yottaverseltd/labs-responsive-shell) (`pages: write`, `id-token: write`, `actions/configure-pages@v5`, `actions/deploy-pages@v4`). This repo historically had **no green deploy** because `configure-pages` with **`enablement: true`** attempted to **create** the Pages site via the API and GitHub returned **Resource not accessible by integration** for the org; without Pages enabled, **`deploy-pages` then fails with HTTP 404** (“Ensure GitHub Pages has been enabled”).
+
+**One-time (GitHub UI):** in this repository open **Settings → Pages** and set **Build and deployment** source to **GitHub Actions**. After that, push to `main` or re-run **deploy-pages**; the live URL remains **`/labs-media-player/`**.
+
 ## License
 
 MIT. See `LICENSE`.

@@ -29,10 +29,11 @@ jobs:
       - name: install wasm-tools
         run: dotnet workload install wasm-tools
 
+      # Omit enablement: true — POST /repos/.../pages fails for many org repos
+      # ("Resource not accessible by integration"). Maintainer enables Pages once:
+      # Settings → Pages → Build and deployment → Source: GitHub Actions.
       - name: configure pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: publish wasm
         run: >
