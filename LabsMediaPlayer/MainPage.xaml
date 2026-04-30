@@ -155,13 +155,22 @@
                    FontFamily="{StaticResource FontFamilyBase}"
                    FontSize="{StaticResource FontSize14}" />
 
-        <MediaPlayerElement x:Name="Player"
-                             Grid.Row="2"
-                             AreTransportControlsEnabled="False"
-                             Width="1"
-                             Height="1"
-                             Opacity="0"
-                             IsHitTestVisible="False" />
+        <Grid Grid.Row="2">
+          <!-- WASM: instantiate via code-behind would still pull Media stack; hosts hidden native element on Desktop/Android -->
+          <Border x:Name="NativeAudioHost"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch" />
+          <TextBlock x:Name="WasmAudioHint"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Margin="12,8"
+                     TextWrapping="WrapWholeWords"
+                     TextAlignment="Center"
+                     Visibility="Collapsed"
+                     Foreground="{StaticResource TextMutedBrush}"
+                     FontFamily="{StaticResource FontFamilyBase}"
+                     FontSize="{StaticResource FontSize12}" />
+        </Grid>
 
         <StackPanel Grid.Row="3"
                     Orientation="Horizontal"

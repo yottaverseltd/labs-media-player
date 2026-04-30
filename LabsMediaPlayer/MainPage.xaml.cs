@@ -5,9 +5,11 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+#if !__WASM__
 using Microsoft.UI.Xaml.Media;
 using Windows.Media.Core;
 using Windows.Media.Playback;
+#endif
 using Windows.Storage;
 
 namespace LabsMediaPlayer;
@@ -23,22 +25,58 @@ public sealed partial class MainPage : Page
     private readonly ObservableCollection<PodcastEpisode> _episodes = new();
     private readonly DispatcherTimer _positionTimer;
 
-    private bool _isWideLayout;
+#if !__WASM__
+    private readonly MediaPlayerElement _playerElement;
+
     private bool _sliderProgrammatic;
     private bool _userScrubbing;
+    private double _speed = 1d;
+#endif
+
+    private bool _isWideLayout;
 
     private string _podcastTitle = string.Empty;
-    private double _speed = 1d;
 
     public MainPage()
     {
         InitializeComponent();
+
+#if !__WASM__
+        _playerElement = new MediaPlayerElement
+        {
+            AreTransportControlsEnabled = false,
+            Width = 1,
+            Height = 1,
+            Opacity = 0,
+            IsHitTestVisible = false,
+        };
+        NativeAudioHost.Child = _playerElement;
+        _playerElement.MediaPlayer.PlaybackSession.PlaybackStateChanged += OnPlaybackStateChanged;
+        _playerElement.MediaPlayer.MediaOpened += OnMediaOpened;
+
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _positionTimer.Tick += OnPositionTick;
+#else
+        WasmAudioHint.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+        WasmAudioHint.Text =
+            "Episode playback ships on Desktop and Android. Here: RSS loader, episodes list, chrome.";
+
+        _positionTimer = new DispatcherTimer();
+
+        SeekBackButton.IsEnabled = false;
+        SeekForwardButton.IsEnabled = false;
+        Speed1Button.IsEnabled = false;
+        Speed125Button.IsEnabled = false;
+        Speed15Button.IsEnabled = false;
+        Speed2Button.IsEnabled = false;
+        PositionSlider.IsEnabled = false;
+        PlayPauseButton.IsEnabled = false;
+#endif
 
         Loaded += OnLoaded;
         RootGrid.SizeChanged += OnRootSizeChanged;
         LoadButton.Click += OnLoadClicked;
+#if !__WASM__
         PlayPauseButton.Click += OnPlayPauseClicked;
         SeekBackButton.Click += (_, _) => SeekRelative(TimeSpan.FromSeconds(-15));
         SeekForwardButton.Click += (_, _) => SeekRelative(TimeSpan.FromSeconds(30));
@@ -46,14 +84,12 @@ public sealed partial class MainPage : Page
         Speed125Button.Click += (_, _) => ApplySpeed(1.25d);
         Speed15Button.Click += (_, _) => ApplySpeed(1.5d);
         Speed2Button.Click += (_, _) => ApplySpeed(2d);
-        EpisodeList.SelectionChanged += OnEpisodeSelected;
         PositionSlider.PointerPressed += OnScrubPointerPressed;
         PositionSlider.PointerReleased += OnScrubPointerReleased;
         PositionSlider.PointerCanceled += OnScrubPointerReleased;
         PositionSlider.ValueChanged += OnSliderValueChanged;
-
-        Player.MediaPlayer.PlaybackSession.PlaybackStateChanged += OnPlaybackStateChanged;
-        Player.MediaPlayer.MediaOpened += OnMediaOpened;
+#endif
+        EpisodeList.SelectionChanged += OnEpisodeSelected;
 
 #if __WASM__
         RssHintText.Text =
@@ -71,8 +107,10 @@ public sealed partial class MainPage : Page
     {
         RestoreFields();
         ApplyLayout(RootGrid.ActualWidth >= WideBreakpoint);
+#if !__WASM__
         UpdateSpeedChrome();
         UpdatePlayPauseGlyph();
+#endif
     }
 
     private void OnRootSizeChanged(object sender, SizeChangedEventArgs e)
@@ -238,11 +276,16 @@ public sealed partial class MainPage : Page
         NowEpisodeTitle.Text = ep.Title;
         NowPodcastTitle.Text = _podcastTitle;
 
-        Player.MediaPlayer.Source = MediaSource.CreateFromUri(ep.AudioUri);
-        Player.MediaPlayer.PlaybackSession.PlaybackRate = _speed;
-        Player.MediaPlayer.Play();
+#if !__WASM__
+        _playerElement.MediaPlayer.Source = MediaSource.CreateFromUri(ep.AudioUri);
+        _playerElement.MediaPlayer.PlaybackSession.PlaybackRate = _speed;
+        _playerElement.MediaPlayer.Play();
+#else
+        StatusText.Text = "Episode selected — audio on Desktop/Android (WASM intentionally Skia-only).";
+#endif
     }
 
+#if !__WASM__
     private void OnMediaOpened(MediaPlayer sender, object args)
     {
         RefreshDurationUi();
@@ -266,14 +309,14 @@ public sealed partial class MainPage : Page
 
     private void OnPlayPauseClicked(object sender, RoutedEventArgs e)
     {
-        var session = Player.MediaPlayer.PlaybackSession;
+        var session = _playerElement.MediaPlayer.PlaybackSession;
         if (session.PlaybackState == MediaPlaybackState.Playing)
         {
-            Player.MediaPlayer.Pause();
+            _playerElement.MediaPlayer.Pause();
         }
         else
         {
-            Player.MediaPlayer.Play();
+            _playerElement.MediaPlayer.Play();
         }
 
         UpdatePlayPauseGlyph();
@@ -281,7 +324,7 @@ public sealed partial class MainPage : Page
 
     private void UpdatePlayPauseGlyph()
     {
-        var session = Player.MediaPlayer.PlaybackSession;
+        var session = _playerElement.MediaPlayer.PlaybackSession;
         PlayPauseIcon.Symbol = session.PlaybackState == MediaPlaybackState.Playing
             ? Symbol.Pause
             : Symbol.Play;
@@ -289,7 +332,7 @@ public sealed partial class MainPage : Page
 
     private void SeekRelative(TimeSpan delta)
     {
-        var session = Player.MediaPlayer.PlaybackSession;
+        var session = _playerElement.MediaPlayer.PlaybackSession;
         var next = session.Position + delta;
         if (next < TimeSpan.Zero)
         {
@@ -309,7 +352,7 @@ public sealed partial class MainPage : Page
     private void ApplySpeed(double rate)
     {
         _speed = rate;
-        Player.MediaPlayer.PlaybackSession.PlaybackRate = rate;
+        _playerElement.MediaPlayer.PlaybackSession.PlaybackRate = rate;
         UpdateSpeedChrome();
     }
 
@@ -335,7 +378,7 @@ public sealed partial class MainPage : Page
 
     private void RefreshDurationUi()
     {
-        var session = Player.MediaPlayer.PlaybackSession;
+        var session = _playerElement.MediaPlayer.PlaybackSession;
         var d = session.NaturalDuration;
         _sliderProgrammatic = true;
         PositionSlider.Maximum = d == TimeSpan.Zero ? 1 : Math.Max(1, d.TotalSeconds);
@@ -350,7 +393,7 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        var session = Player.MediaPlayer.PlaybackSession;
+        var session = _playerElement.MediaPlayer.PlaybackSession;
         var duration = session.NaturalDuration;
         var position = session.Position;
 
@@ -384,7 +427,7 @@ public sealed partial class MainPage : Page
         }
 
         _userScrubbing = false;
-        Player.MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(PositionSlider.Value);
+        _playerElement.MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(PositionSlider.Value);
         RefreshScrubberUi(force: true);
     }
 
@@ -395,10 +438,11 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        Player.MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(e.NewValue);
+        _playerElement.MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(e.NewValue);
         TimeLabel.Text =
-            $"{FormatClock(TimeSpan.FromSeconds(e.NewValue))} / {FormatClock(Player.MediaPlayer.PlaybackSession.NaturalDuration)}";
+            $"{FormatClock(TimeSpan.FromSeconds(e.NewValue))} / {FormatClock(_playerElement.MediaPlayer.PlaybackSession.NaturalDuration)}";
     }
+#endif
 }
 
 internal static class FeedDefaults

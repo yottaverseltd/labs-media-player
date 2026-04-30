@@ -13,7 +13,21 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+#if __WASM__
+        this.UnhandledException += OnWasmUnhandledException;
+#endif
     }
+
+#if __WASM__
+    /// <summary>Logs globally unhandled faults (type only on Release to avoid leaking feed URLs).</summary>
+    private static void OnWasmUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine($"[App] Unhandled: {e.Exception}");
+#endif
+        System.Console.WriteLine("[App] Unhandled: " + e.Exception?.GetType().FullName);
+    }
+#endif
 
     protected Window? MainWindow { get; private set; }
 

@@ -1,6 +1,8 @@
 # labs-media-player
 
-Cross-platform podcast lab in Uno: RSS enclosures and **MediaPlayerElement** (HTML audio on WebAssembly, native stacks on Windows desktop and Android). Optional Cloudflare Worker under `worker/` for WASM CORS.
+Cross-platform podcast lab in Uno: RSS enclosures and **MediaPlayerElement** on **Windows desktop** and **Android**. **WebAssembly** uses the same Skia shell as `labs-responsive-shell` with RSS + episode chrome; in-browser audio is not wired (blank-canvas risk with the media stack on WASM was the reason).
+
+Optional Cloudflare Worker under `worker/` for WASM CORS.
 
 ## Try it on GitHub Pages
 
@@ -43,7 +45,7 @@ dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj -c Release -f net9.0-brows
 
 ## Stack
 
-- Uno single project, Skia renderer, **MediaPlayerElement** feature.
+- Uno single project, Skia renderer; **MediaPlayerElement** UnoFeature on desktop/Android only (browserwasm stays Skia-only for stable first paint).
 - RSS via **System.ServiceModel.Syndication** (optional `itunes:duration` when present).
 - **CI:** [`ci.yml`](.github/workflows/ci.yml) — builds wasm + desktop + android; on `main`, ships **continuous** prerelease assets and workflow artifacts.
 - **Pages:** [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) — WASM to GitHub Pages with `WasmShellWebAppBasePath=/labs-media-player/`, `.nojekyll` for `_framework`.

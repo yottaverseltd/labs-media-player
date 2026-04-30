@@ -15,13 +15,15 @@
     <!-- Package Publisher -->
     <ApplicationPublisher>yottaverseltd</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>Cross-platform podcast lab: RSS, enclosures, MediaPlayerElement on WASM, Windows desktop, and Android.</Description>
+    <Description>Cross-platform podcast lab: RSS enclosures, HTML5/native MediaPlayerElement on desktop &amp; Android; WASM uses Skia + podcast UI (playback placeholder).</Description>
 
     <!--
-      UnoFeatures are used to quickly add and manage features enabled for your app.
+      MediaPlayerElement on WASM can leave a blank canvas after splash (Skia + native audio stack).
+      Desktop/Android keep MediaPlayerElement; browserwasm stays SkiaRenderer-only (parity with labs-responsive-shell).
       https://aka.platform.uno/singleproject-features
     -->
-    <UnoFeatures>
+    <UnoFeatures Condition="'$(TargetFramework)' == 'net9.0-browserwasm'">SkiaRenderer;</UnoFeatures>
+    <UnoFeatures Condition="'$(TargetFramework)' != 'net9.0-browserwasm'">
       SkiaRenderer;
       MediaPlayerElement;
     </UnoFeatures>
