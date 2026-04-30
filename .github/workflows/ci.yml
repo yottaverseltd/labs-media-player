@@ -46,18 +46,32 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: publish desktop (main)
+      # Self-contained win-x64 so the EXE runs without a separate .NET Desktop Runtime install (framework-dependent zips often "do nothing" on click).
+      - name: publish desktop self-contained (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: >
           dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
           -c Release -f net9.0-desktop
+          -r win-x64 -p:SelfContained=true
+          -p:TargetFrameworks=net9.0-desktop
           -o publish/desktop
           /p:TreatWarningsAsErrors=true
 
-      - name: zip desktop (main)
+      - name: zip desktop portable (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
-        run: Compress-Archive -Path publish/desktop/* -DestinationPath labs-media-player-net9.0-desktop.zip -Force
+        run: Compress-Archive -Path publish/desktop/* -DestinationPath labs-media-player-win-x64-self-contained.zip -Force
+
+      - name: install Inno Setup (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: choco install innosetup --no-progress -y
+
+      - name: build Windows installer (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "${{ github.workspace }}\installer\LabsMediaPlayer.iss"
+          if (-not (Test-Path "artifacts/installer/labs-media-player-win-x64-setup.exe")) { throw "Inno did not produce setup.exe" }
 
       - name: publish android (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -79,7 +93,9 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: desktop-windows
-          path: labs-media-player-net9.0-desktop.zip
+          path: |
+            labs-media-player-win-x64-self-contained.zip
+            artifacts/installer/labs-media-player-win-x64-setup.exe
           if-no-files-found: error
           retention-days: 30
 
@@ -103,11 +119,12 @@ jobs:
               --repo "${GITHUB_REPOSITORY}" \
               --prerelease \
               --title "Continuous (main)" \
-              --notes "Windows desktop (.zip) and Android (.apk) from the latest successful build on \`main\`. Tag is stable for URLs; assets are replaced each run." \
+              --notes "Windows: **installer** (\`labs-media-player-win-x64-setup.exe\`, recommended) or portable **self-contained** zip (\`labs-media-player-win-x64-self-contained.zip\` — no separate .NET runtime). Android: \`labs-media-player-net9.0-android.apk\`. Refreshed on each green \`main\` build." \
               --target "${GITHUB_SHA}"
           fi
           gh release upload continuous \
-            labs-media-player-net9.0-desktop.zip \
+            labs-media-player-win-x64-self-contained.zip \
+            artifacts/installer/labs-media-player-win-x64-setup.exe \
             labs-media-player-net9.0-android.apk \
             --repo "${GITHUB_REPOSITORY}" \
             --clobber

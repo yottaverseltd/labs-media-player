@@ -1,0 +1,53 @@
+# Manual iOS compile check on macOS. Does not produce a signed IPA or TestFlight upload.
+# Distribution still requires Apple Developer Program, signing certs, and provisioning
+# (and GitHub secrets such as APPLE_* / p12 / profiles) — see README iOS section.
+name: ios-build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: install workloads
+        run: dotnet workload install ios
+
+      - name: restore
+        run: dotnet restore
+
+      - name: build iOS (Release)
+        run: >
+          dotnet build LabsMediaPlayer/LabsMediaPlayer.csproj
+          -c Release -f net9.0-ios
+          /p:TreatWarningsAsErrors=true
+          --no-restore
+
+      - name: list iOS output
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          find LabsMediaPlayer/bin/Release/net9.0-ios -maxdepth 6 -type d -name '*.app' 2>/dev/null | head -20 || true
+          find LabsMediaPlayer/bin/Release/net9.0-ios -maxdepth 8 2>/dev/null | head -40 || true
+
+      - name: upload iOS app folder (if produced)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: labs-media-player-ios-app-unsigned
+          path: |
+            LabsMediaPlayer/bin/Release/net9.0-ios/**/*.app
+          if-no-files-found: warn
+          retention-days: 7

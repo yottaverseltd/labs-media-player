@@ -15,7 +15,7 @@
     <!-- Package Publisher -->
     <ApplicationPublisher>yottaverseltd</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>Cross-platform podcast lab: RSS enclosures, HTML5/native MediaPlayerElement on desktop &amp; Android; WASM uses Skia + podcast UI (playback placeholder).</Description>
+    <Description>Cross-platform podcast lab: RSS and enclosures; MediaPlayerElement playback on Windows desktop and Android; WASM Skia shell (RSS + episode list; optional Worker for CORS); iOS when building on macOS.</Description>
 
     <!--
       MediaPlayerElement on WASM can leave a blank canvas after splash (Skia + native audio stack).
@@ -30,6 +30,11 @@
 
     <!-- Wasm boot splash background (merged into AppManifest.js by Resizetizer — default is #FFFFFF) -->
     <UnoSplashScreenColor>#0B0D10</UnoSplashScreenColor>
+  </PropertyGroup>
+
+  <!-- net9.0-ios is evaluated only on macOS so Windows/Linux CI keeps building wasm + desktop + android. -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('osx'))">
+    <TargetFrameworks>$(TargetFrameworks);net9.0-ios</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

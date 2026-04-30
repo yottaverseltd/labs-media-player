@@ -1,6 +1,6 @@
 name: release-desktop
 
-# Publishes net9.0-desktop output as a zip attached to a GitHub Release for tag v*.
+# Publishes net9.0-desktop self-contained output + Inno installer for tag v*.
 
 on:
   push:
@@ -22,21 +22,36 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: publish net9.0-desktop
+      - name: publish net9.0-desktop (win-x64 self-contained)
         run: >
           dotnet publish LabsMediaPlayer/LabsMediaPlayer.csproj
           -c Release -f net9.0-desktop
+          -r win-x64 -p:SelfContained=true
+          -p:TargetFrameworks=net9.0-desktop
           -o publish/out
           /p:TreatWarningsAsErrors=true
 
-      - name: zip publish output
+      - name: zip portable
         shell: pwsh
-        run: Compress-Archive -Path publish/out/* -DestinationPath labs-media-player-net9.0-desktop.zip -Force
+        run: Compress-Archive -Path publish/out/* -DestinationPath labs-media-player-win-x64-self-contained.zip -Force
+
+      - name: install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path publish/desktop -Force | Out-Null
+          Copy-Item -Path publish/out/* -Destination publish/desktop -Recurse -Force
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "${{ github.workspace }}\installer\LabsMediaPlayer.iss"
+          if (-not (Test-Path "artifacts/installer/labs-media-player-win-x64-setup.exe")) { throw "Inno did not produce setup.exe" }
 
       - name: upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: labs-media-player-net9.0-desktop.zip
+          files: |
+            labs-media-player-win-x64-self-contained.zip
+            artifacts/installer/labs-media-player-win-x64-setup.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
