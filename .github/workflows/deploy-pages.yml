@@ -29,10 +29,7 @@ jobs:
       - name: install wasm-tools
         run: dotnet workload install wasm-tools
 
-      - name: configure pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # why: first Pages enablement must be done in repo Settings (Source: GitHub Actions); GITHUB_TOKEN cannot create the site on some orgs
 
       - name: publish wasm
         run: >

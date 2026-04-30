@@ -33,7 +33,9 @@ Desktop Skia can call the feed URL directly; the proxy remains optional.
 
 ## Live site
 
-GitHub Pages deploy workflow publishes WASM with `WasmShellWebAppBasePath=/labs-media-player/`.
+Turn on GitHub Pages once: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+The workflow publishes WASM with `WasmShellWebAppBasePath=/labs-media-player/`.
 
 After the first successful run on `main`:
 
